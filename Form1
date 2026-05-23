@@ -1,0 +1,169 @@
+namespace DatabaseConnection
+{
+    public partial class Form1 : Form
+    {
+        string connectionString =ConfigurationManager.ConnectionStrings["MyDBConnection"].ConnectionString;
+        SqlConnection con;
+        SqlCommand cmd;
+
+        public Form1()
+        {
+            InitializeComponent();
+            con = new SqlConnection(connectionString);
+            cmd = new SqlCommand();
+            cmd.Connection = con;
+        }
+        private void reset()
+        {
+            btnAdd.Text = "Add";
+            btnEdit.Text = "Edit";
+            btnClose.Text = "Close";
+            btnAdd.Enabled = true;
+            btnEdit.Enabled = false;
+            btnDelete.Enabled = false;
+            txtfname.Text = "";
+            txtlname.Text = "";
+            txtid.Text = "";
+            txtfname.Enabled = false;
+            txtlname.Enabled = false;
+        }
+        private void LoadData()
+        {
+            try { 
+                con.Open();
+                string query = "SELECT * FROM tblStudents WHERE isDeleted='No'";
+                using (SqlCommand cmd = new SqlCommand(query, con))
+                {
+                   SqlDataAdapter adapter = new SqlDataAdapter(cmd);
+                    DataTable dt = new DataTable();
+                    adapter.Fill(dt);
+                    dataGridView1.DataSource = dt;
+                }
+                con.Close();
+            }catch(Exception e) 
+            { 
+            
+            }
+        
+        }
+        private void button2_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            LoadData();
+        }
+
+        private void btnAdd_Click(object sender, EventArgs e)
+        {
+            if(btnAdd.Text=="Add")
+            {
+                btnAdd.Text = "Save";
+                btnClose.Text = "Cancel";
+                txtfname.Enabled = true;
+                txtlname.Enabled = true;
+                txtfname.Focus();
+            }
+            else
+            {
+                con.Open();
+                cmd.CommandText = "INSERT INTO tblStudents (FirstName, LastName, isDeleted) VALUES ('"+ txtfname.Text +"','"+ txtlname.Text +"','No')";
+                cmd.ExecuteNonQuery();
+                con.Close();
+
+                MessageBox.Show("Succesfully saved an info.");
+                LoadData();
+                reset();
+            }
+
+        }
+
+        private void btnClose_Click(object sender, EventArgs e)
+        {
+            if (btnClose.Text == "Cancel")
+            {
+                reset();
+            }
+            else
+            {
+                this.Close();
+                frmMain frmMain = new frmMain();
+                frmMain.Show();
+            }
+        }
+
+        private void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+
+        }
+
+        private void dataGridView1_CellClick(object sender, DataGridViewCellEventArgs e)
+        {
+            txtid.Text = dataGridView1.CurrentRow.Cells["ID"].Value.ToString();
+            txtfname.Text = dataGridView1.CurrentRow.Cells["FirstName"].Value.ToString();
+            txtlname.Text = dataGridView1.CurrentRow.Cells["LastName"].Value.ToString();
+            btnAdd.Enabled = false;
+            btnEdit.Enabled = true;
+            btnDelete.Enabled = true;
+            btnClose.Text = "Cancel";
+        }
+
+        private void btnEdit_Click(object sender, EventArgs e)
+        {
+            if (btnEdit.Text == "Edit") 
+            { 
+                btnEdit.Text = "Update";
+                btnDelete.Enabled=false;
+                txtfname.Enabled = true;
+                txtlname.Enabled = true;
+            }
+            else
+            {
+                con.Open();
+                cmd.CommandText = "UPDATE tblStudents SET FirstName ='"+txtfname.Text+"',LastName='"+txtlname.Text+"' WHERE ID='"+txtid.Text+"'";
+                cmd.ExecuteNonQuery();
+                con.Close();
+
+                MessageBox.Show("Succesfully updated an info.");
+                LoadData();
+                reset();
+            }
+        }
+
+        private void btnDelete_Click(object sender, EventArgs e)
+        {
+            DialogResult result = MessageBox.Show("Are you sure to deleted this record?","Warning", MessageBoxButtons.YesNo,MessageBoxIcon.Question);
+
+            if (result == DialogResult.Yes)
+                {
+                con.Open() ;
+                cmd.CommandText = "UPDATE tblStudents SET isDeleted = 'Yes' WHERE ID = '" + txtid.Text + "'";
+                cmd.ExecuteNonQuery() ;
+                con.Close();
+
+                MessageBox.Show("Succesfully updated an info.");
+                LoadData();
+                reset();
+            }
+            {
+                
+            }
+        }
+
+        private void txtSearch_TextChanged(object sender, EventArgs e)
+        {
+            con.Open();
+            string query = "SELECT * FROM tblStudents WHERE isDeleted = 'No' AND (FirstName LIKE '%"+txtSearch.Text+ "%' OR LastName LIKE '%"+txtSearch.Text+"%')";
+            using (SqlCommand cmd = new SqlCommand(query, con))
+            {
+                SqlDataAdapter adapter = new SqlDataAdapter(cmd);
+                DataTable dt = new DataTable();
+                adapter.Fill(dt);
+                dataGridView1.DataSource = dt;
+            }
+            con.Close();
+        }
+    }
+}
