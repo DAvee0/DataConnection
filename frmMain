@@ -1,0 +1,24 @@
+namespace DatabaseConnection
+{
+    public partial class frmMain : Form
+    {
+        public frmMain()
+        {
+            InitializeComponent();
+        }
+
+        private void logoutToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            this.Close();
+            frmlogin frmlogin = new frmlogin();
+            frmlogin.Show();
+        }
+
+        private void goToForm1ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            this.Close();
+            Form1 frm = new Form1();
+            frm.Show();
+        }
+    }
+}
