@@ -1,0 +1,64 @@
+namespace DatabaseConnection
+{
+    public partial class frmlogin : Form
+    {
+        string connectionString = ConfigurationManager.ConnectionStrings["MyDBConnection"].ConnectionString;
+        SqlConnection con;
+        SqlCommand cmd;
+
+        public frmlogin()
+        {
+            InitializeComponent();
+            con = new SqlConnection(connectionString);
+            cmd = new SqlCommand();
+            cmd.Connection = con;
+        }
+
+        private void btnCancel_Click(object sender, EventArgs e)
+        {
+            Close();
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            if (btnShow.Text == "Show")
+            {
+                btnShow.Text = "Hide";
+                txtPassword.PasswordChar = '*';
+            }
+            else
+            {
+                btnShow.Text = "Show";
+                txtPassword.PasswordChar = '\0';
+            }
+            
+        }
+
+        private void btnLogin_Click(object sender, EventArgs e)
+        {
+            con.Open();
+            string query = "SELECT * FROM tblUserAccounts WHERE Username= '"+txtUsername.Text+"' AND Password='"+txtPassword.Text+"' ";
+            using (SqlCommand cmd = new SqlCommand(query, con))
+            {
+                SqlDataAdapter adapter = new SqlDataAdapter(cmd);
+                DataTable dt = new DataTable();
+                adapter.Fill(dt);
+
+                if (dt.Rows.Count > 0)
+                {
+                    frmMain frm = new frmMain();
+                    this.Hide();
+                    frm.Show();
+                }else
+                {
+                    MessageBox.Show("Invalid username or password");
+                    txtUsername.Text = "";
+                    txtPassword.Text = "";
+                }
+               
+            }
+            con.Close();
+
+        }
+    }
+}
